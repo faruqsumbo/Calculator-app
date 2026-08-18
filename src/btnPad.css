@@ -20,6 +20,8 @@
     text-align: right;
     border: 0;
     margin: auto;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', sans-serif;
+    font-size: clamp(1rem, 1rem + 1vw, 1.5rem);
 }
 
  .btn-rows {
