@@ -1,22 +1,48 @@
 import React, { use } from "react"
 import { useState } from "react";
 import './btnPad.css';
+import { evaluate } from "mathjs";
 
 export function BtnPad() {
     const [dispValue, setDispValue] = useState('');
     const [evalValue, setEvalValue] = useState('')
     const [result, setResult] = useState('')
     const [isDeg, setIsDeg] = useState(false)
+    const [isInv, setIsInv] = useState(false);
+
+
+    const handleInv = () => {
+        setIsInv(prev => !prev)
+    };
+
+    const trigFuncs = isInv ? {
+        sin: 'sin-1',
+        cos: 'cos-1',
+        tan: 'tan-1'
+    } : {
+        sin: 'sin',
+        cos: 'cos',
+        tan: 'tan'
+    };
+
     const mathMapping = isDeg ? {
         'sin(': `Math.sin(Math.PI/180*`,
         'cos(': `Math.cos(Math.PI/180*`,
         'tan(': `Math.tan(Math.PI/180*`,
+        'sin-1(': `(180/Math.PI)*Math.asin(`,
+        'cos-1(': `(180/Math.PI)*Math.acos(`,
+        'tan-1(': `(180/Math.PI)*Math.atan(`,
         'log(': 'Math.log10(',
         'ln(': 'Math.log(',
         '√(': 'Math.sqrt(',
         'e': 'Math.exp(1)',
-        'π': 'Math.PI'
+        'π': 'Math.PI',
+        '^2': '**2',
+        '^': '**'
     } : {
+        'sin-1(': `Math.asin(`,
+        'cos-1(': `Math.acos(`,
+        'tan-1(': `Math.atan(`,
         'sin(': 'Math.sin(',
         'cos(': 'Math.cos(',
         'tan(': 'Math.tan(',
@@ -24,7 +50,9 @@ export function BtnPad() {
         'ln(': 'Math.log(',
         '√(': 'Math.sqrt(',
         'e': 'Math.exp(1)',
-        'π': 'Math.PI'
+        'π': 'Math.PI',
+        '^2': '**2',
+        '^': '**'
     };
 
     const handleIsDeg = () => {
@@ -35,6 +63,10 @@ export function BtnPad() {
     };
 
     const handleClick = (value) => {
+        const regex = /(sin|cos|tan)\(\d+$/;
+        if (regex.test(dispValue) && isDeg && value === ')') {
+            setDispValue(prev => prev + ' deg)');
+        }
         setDispValue(prev => prev + value);
 
         const evalAddition = mathMapping[value] || value;
@@ -58,6 +90,7 @@ export function BtnPad() {
     };
 
     const handleEval = (e) => {
+        console.log('evalValue:', evalValue);
         if (e && e.preventDefault) e.preventDefault();
         const factRegex = /(\d+)!/g;
         const newEvalValue = evalValue.replace(factRegex, (match, number) => {
@@ -68,22 +101,17 @@ export function BtnPad() {
             return result;
         });
 
-        console.log(newEvalValue)
         try {
             const currentResult = String(eval(newEvalValue));
             if (currentResult === 'Infinity' || currentResult === '-Infinity' || currentResult === 'NaN') {
                 setResult('Error')
-                console.log("4a. Math error caught (Infinity/NaN). Setting states to Error.");
-
             } else {
                 setResult(currentResult)
             }
 
         } catch (error) {
-            console.log("4b. Calculation successful. Updating display with numbers.");
-
             setResult('Error');
-            setDispValue(() => 'Error'); // 🟢 THIS ensures the screen actually updates!
+            setDispValue(() => 'Error');
             setEvalValue('');
         }
         setDispValue('')
@@ -113,23 +141,23 @@ export function BtnPad() {
                     <button type="button" className="btn" id="plus-btn" onClick={() => handleClick('+')}>+</button>
                     <button type="button" className="btn" id="brac-open-btn" onClick={() => handleClick('(')}>{'('}</button>
                     <button type="button" className="btn" id="brac-close-btn" onClick={() => handleClick(')')}>{')'}</button>
-                    <button type="button" className="btn" id="tan-btn" onClick={() => handleClick('tan(')}>tan</button>
+                    <button type="button" className="btn" id="tan-btn" onClick={() => handleClick(`${trigFuncs.tan}(`)}>{trigFuncs.tan}</button>
                 </div>
                 <div className="row">
                     <button type="button" className="btn" id="four-btn" onClick={() => handleClick(4)}>4</button>
                     <button type="button" className="btn" id="five-btn" onClick={() => handleClick('5')}>5</button>
                     <button type="button" className="btn" id="six-btn" onClick={() => handleClick('6')}>6</button>
                     <button type="button" className="btn" id="minus-btn" onClick={() => handleClick('-')}>-</button>
-                    <button type="button" className="btn" id="sin-btn" onClick={() => handleClick('sin(')}>sin</button>
-                    <button type="button" className="btn" id="cos-btn" onClick={() => handleClick('cos(')}>cos</button>
+                    <button type="button" className="btn" id="sin-btn" onClick={() => handleClick(`${trigFuncs.sin}(`)}>{trigFuncs.sin}</button>
+                    <button type="button" className="btn" id="cos-btn" onClick={() => handleClick(`${trigFuncs.cos}(`)}>{trigFuncs.cos}</button>
                     <button type="button" className="btn" id="log-btn" onClick={() => handleClick('log(')}>log</button>
                 </div>
                 <div className="row">
                     <button type="button" className="btn" id="seven-btn" onClick={() => handleClick('7')}>7</button>
                     <button type="button" className="btn" id="eight-btn" onClick={() => handleClick('8')}>8</button>
                     <button type="button" className="btn" id="nine-btn" onClick={() => handleClick('9')}>9</button>
-                    <button type="button" className="btn" id="square-btn" onClick={() => setDispValue(prev => prev + ('<sup>2</sup>'))}>X<sup>2</sup></button>
-                    <button type="button" className="btn" id="power-btn" onClick={() => handleClick('')}>X<sup>y</sup> </button>
+                    <button type="button" className="btn" id="square-btn" onClick={() => handleClick('^2')}>X<sup>2</sup></button>
+                    <button type="button" className="btn" id="power-btn" onClick={() => handleClick('^')}>X<sup>y</sup> </button>
                     <button type="button" className="btn" id="sqrt-btn" onClick={() => handleClick('√(')}> &#8730;x</button>
                     <button type="button" className="btn" id="ln-btn" onClick={() => handleClick('ln(')}>ln</button>
 
@@ -139,7 +167,7 @@ export function BtnPad() {
                     <button type="button" className="btn" id="zero-btn" onClick={() => handleClick('0')}>0</button>
                     <button type="button" className="btn" id="equals-btn" onClick={() => handleEval()}>=</button>
                     <button type="button" className="btn" id="delete-btn" onClick={() => handleDelete()}>&#x232B;</button>
-                    <button type="button" className="btn" id="inv-btn" onClick={() => setResult(1 / result)}>Inv</button>
+                    <button type="button" className="btn" id="inv-btn" onClick={() => handleInv()}>Inv</button>
                     <input type="button" className="btn" id="deg-btn" value={isDeg ? 'Deg' : 'Rad'} onClick={() => setIsDeg(isDeg ? false : true)} />
                     <button type="button" className="btn" id="ans-btn" onClick={() => setDispValue(result)}>Ans</button>
                 </div>
