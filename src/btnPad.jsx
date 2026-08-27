@@ -2,7 +2,6 @@ import React, { use } from "react"
 import { useState } from "react";
 import './btnPad.css';
 import { math } from "./mathUtilis";
-import { number, sin } from "mathjs";
 
 export function BtnPad() {
     const [dispValue, setDispValue] = useState('');

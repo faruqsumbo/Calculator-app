@@ -41,7 +41,7 @@
  .btn-pads {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 20px;
     justify-content: space-between;
 }
 .basic-pad, .trig-pad {
@@ -81,6 +81,7 @@
     .btn-pads {
         display: block;
         justify-content: space-evenly;
+
     }
 
     .toggle-btn {
